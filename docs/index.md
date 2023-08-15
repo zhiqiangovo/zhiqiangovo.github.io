@@ -5,7 +5,7 @@ hero:
   name: "my docs"
   text: "A VitePress Site"
   tagline: My great project tagline
-  image: /01.jpg
+  image: /555.jpg
   actions:
     - theme: brand
       text: "开始"
