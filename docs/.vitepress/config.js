@@ -16,6 +16,7 @@ export default defineConfig({
       { text: "JavaScript", link: "/javascript" },
       { text: "TypeScript", link: "/typescript" },
       { text: "NodeJs", link: "/nodejs" },
+      { text: "甜甜花酿坤", link: "/fontEnd" },
     ],
 
     sidebar: {
