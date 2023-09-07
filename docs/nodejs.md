@@ -10,6 +10,8 @@
 4. Nodejs 使用**npm**作为包管理工具，相当于 python 的 pip，java 的 Maven。
 5. Nodejs 适用于一些 IO 密集应用，不适合 CPU 密集型应用，（所谓 CPU 密集，指图像的处理，或者音频处理需要大量数据结构和算法），nodejsIO 依靠 libuv 有较强的处理能力，而由于 nodejs 是单线程的原因，会造成 CPU 占用率高的问题。若有此方面需求，可使用 C++插件编写，或使用 nodejs 提供的**cluster**。
 
+![](./public/node/start.webp)
+
 ### 2：应用场景
 
 **前端**：Vue Angular React nuxtjs nextjs
@@ -85,3 +87,76 @@ npm（Node package Manger）是 nodejs 的包管理工具，是基于命令行�
 **vession**三段式版本号，如 1.0.0 大版本号 次版本号 修订号，大版本号一般是有重大变化才会升级，次版本号一般是增加功能进行升级，修订号一般是修改 bug 进行升级
 
 **npm Install** 安装模块是扁平化安装，但有时候会出现嵌套情况是因为版本不同。例如 A 依赖 C1.0，B 依赖 C1.0，D 依赖 C2.0，此时 C1.0 就会被放到 A B 的 node_modules 下，C2.0 就会被放到 D 模块下的 node_modules
+
+## 三：Npm install 原理
+
+### 1：npm 安装流程
+
+npm 安装的依赖会放在根目录的 node_modules 中，默认采用的是扁平化的方式安装，并且排序的规则为：**.bin**为第一个，其次为**@系列**，最后是按照**字母顺序 abcd**，并且使用的算法是**广度优先遍历**，具体为在遍历依赖树时，npm 会首先处理根目录下的依赖，然后逐层处理每个依赖包的依赖，直到所有的依赖被处理完毕。在处理每个依赖时，npm 会检查该依赖的版本号是否符合依赖树中其他依赖版本要求，如果不符合，则会尝试安装适合的版本。
+
+### 2：扁平化
+
+所谓扁平化，指的是：
+
+在理想状态下：例如：在安装某个二级模块时，发现第一层级有相同名称，相同版本的模块，便直接复用那个模块。A 模块依赖 C1.0，B 模块也依赖 C1.0，这时，就会把 C1.0 安装到了第一级（与 A，B 同级）。
+
+在非理想状态下，A 模块依赖 C1.0，B 依赖 C2.0，这时就无法复用，会出现模块冗余的情况，就会给 B 继续搞一层 node_modules，就是非扁平化了。
+
+### 3：npm install 原理
+
+![](./public/node/npminstall.webp)
+
+**npmrc 文件配置**
+
+```shell
+registry=http://registry.npmjs.org/
+# 定义npm的registry，即npm的包下载源
+
+proxy=http://proxy.example.com:8080/
+# 定义npm的代理服务器，用于访问网络
+
+https-proxy=http://proxy.example.com:8080/
+# 定义npm的https代理服务器，用于访问网络
+
+strict-ssl=true
+# 是否在SSL证书验证错误时退出
+
+cafile=/path/to/cafile.pem
+# 定义自定义CA证书文件的路径
+
+user-agent=npm/{npm-version} node/{node-version} {platform}
+# 自定义请求头中的User-Agent
+
+save=true
+# 安装包时是否自动保存到package.json的dependencies中
+
+save-dev=true
+# 安装包时是否自动保存到package.json的devDependencies中
+
+save-exact=true
+# 安装包时是否精确保存版本号
+
+engine-strict=true
+# 是否在安装时检查依赖的node和npm版本是否符合要求
+
+scripts-prepend-node-path=true
+# 是否在运行脚本时自动将node的路径添加到PATH环境变量中
+```
+
+**package-lock.json 的作用**
+
+- **version**：指定当前包的版本号
+
+- **resolved**：指定当前包的下载地址
+
+- **integrity**：用于验证包的完整性
+
+- **dev**：指定当前包是一个开发依赖包
+
+- **bin**：指定当前包中可执行文件的路径和名称
+
+- **engines**：指定当前包所依赖的 Node.js 版本范围
+
+**package-lock.json 缓存原理：**
+
+它通过文件 **name + version +integrity** 信息生成一个唯一的**key**，这个**key**能找到对应的**index-v5**下的缓存记录（也就是**npm cache**文件下的），如果发现有缓存记录，就会找到**tar**包的**hash**值，然后将对应的二进制文件解压到**node_modeules**
