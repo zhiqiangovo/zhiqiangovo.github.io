@@ -194,3 +194,24 @@ scripts-prepend-node-path=true
 执行**npm run dev**命令时，**predev**会自动执行，它的生命周期是在**dev**之前执行，然后执行**dev**命令，再执行**postdev**
 
 **运用场景**：npm run bulid 在打包完成后，删除 dist 目录
+
+## 五：npx
+
+**npx**是一个命令行工具，它是**npm 5.2.0**版本中新增的功能，它允许用户在不安装全局的包的情况下，运行已安装在本地项目中的包或者远程仓库中的包。
+
+### 1：**npx 优势**
+
+1. 避免全局安装：npx 允许你执行 npm package，而不需要你先全局安装它。
+2. 总是使用最新版本：如果你没有在本地安装相应的 npm package，npx 会从 npm 的 package 库中下载并使用最新版。
+3. 执行任意 npm 包：npx 不仅可以执行 package.json 的 scripts 部分定义的命令，还可以执行任何 npm package
+4. 执行 GitHub gist：npx 甚至可以执行 GitHub gist 或者其他公开的 JavaScript 文件。
+
+### 2：**npx 和 npm 的区别**
+
+**npx**侧重执行命令的，执行某个模块的命令。虽然会自动安装，但是重在执行命令。
+
+**npm**侧重安装或者卸载某个模块。重在安装，并不具备执行某个模块的命令。
+
+### 3：**运行机制**
+
+npx 的运行规则和 npm 是一样的，首先本地目录查看**.bin**，看有没有，如果没有，就去全局的 node_modules 查找，如果还没有，就去下载这个包，然后执行命令，然后删除这个包。
