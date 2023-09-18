@@ -160,3 +160,37 @@ scripts-prepend-node-path=true
 **package-lock.json 缓存原理：**
 
 它通过文件 **name + version +integrity** 信息生成一个唯一的**key**，这个**key**能找到对应的**index-v5**下的缓存记录（也就是**npm cache**文件下的），如果发现有缓存记录，就会找到**tar**包的**hash**值，然后将对应的二进制文件解压到**node_modeules**
+
+## 四：npm run 原理
+
+### 1：执行流程
+
+当我们在执行**npm run dev**时，首先会去读取**package.json**的 script 对应的脚本命令（如：dev:vite），它的查找规则如下：
+
+- 先从当前项目的**node_modules/.bin**中去查找可执行的命令 vite
+
+- 如果没找到就去全局的**node_modules**去找执行的命令 vite
+
+- 如果还没找到，就去环境变量查找
+
+- 再找不到就进行报错
+
+如果找到成功的话，会有三个文件（**xx.sh**，**xx.cmd**，**xx.ps1**），因为 node.js 是跨平台的，所以可执行命令兼容各个平台
+
+- **.sh**文件：给 Linux，Unix，Macos 使用
+- **.cmd**文件：给 windows 的 cmd 使用
+- **.ps1**文件：给 windows 的 powershell 使用
+
+至此，执行对应文件的命令
+
+### 2：npm 生命周期
+
+```json
+"predev": "node prev.js",
+"dev": "node index.js",
+"postdev": "node post.js"
+```
+
+执行**npm run dev**命令时，**predev**会自动执行，它的生命周期是在**dev**之前执行，然后执行**dev**命令，再执行**postdev**
+
+**运用场景**：npm run bulid 在打包完成后，删除 dist 目录
