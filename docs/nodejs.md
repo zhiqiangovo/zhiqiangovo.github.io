@@ -215,3 +215,118 @@ scripts-prepend-node-path=true
 ### 3：**运行机制**
 
 npx 的运行规则和 npm 是一样的，首先本地目录查看**.bin**，看有没有，如果没有，就去全局的 node_modules 查找，如果还没有，就去下载这个包，然后执行命令，然后删除这个包。
+
+## 六：npm 搭建私服
+
+1. 利用**verdaccio** 可快速搭建私服
+
+   ```shell
+   npm install verdaccio -g
+   ```
+
+2. 执行执行 **verdaccio**
+
+   ```shell
+   verdaccio
+   ```
+
+   此时会开启一个默认端口为 4873 的服务，当然，也可以指定端口，如：**verdaccio --listen 9999**，也可指定安装源：**npm install --registry http://localhost:4873**
+
+3. 创建用户
+
+   ```shell
+   npm adduser --registry http://localhost:4873/
+   ```
+
+4. 发布 npm
+
+```shell
+npm publish --registry http://localhost:4873/
+```
+
+## 七：模块化
+
+### 1：CommonJs 规范
+
+- 引入模块（require）支持以下格式
+
+1. 支持引入内置模块，例如 **http**，**os**，**fs**，**child_process**等内置模块
+2. 支持引入第三方模块**express**，**md5**，**koa**等
+3. 支持引入自己编写的模块./../等
+4. 支持引入**addon** **C++扩展模块.node**文件
+
+```js
+const fs = require("node:fs"); // 导入核心模块
+const express = require("express"); // 导入 node_modules 目录下的模块
+const myModule = require("./myModule.js"); // 导入相对路径下的模块
+const nodeModule = require("./myModule.node"); // 导入扩展模块
+```
+
+- 导出模块**exports**和**module.exports**
+
+```js
+module.exports = {
+  hello: function () {
+    console.log("hello world");
+  },
+};
+module.exports = 123;
+```
+
+### 2：ESM 模块规范
+
+引入模块**import**必须写在头部
+
+使用 esm 模块时必须在**package.json**中开启一个选项，设置**type：module**
+
+```js
+import fs from "node:fs";
+```
+
+如果需要引入**json**文件，需要使用**断言**并指定类型为 json
+
+```js
+import data from "./data.json" assert { type: "json" };
+```
+
+加载模块的**整体对象**
+
+```js
+import * as all from "xxx.js";
+```
+
+**动态导入模块**
+
+import 静态加载不支持掺杂在逻辑中，如果想动态加载，可以使用 import 函数模式
+
+```js
+if (true) {
+  import("./test.js").then();
+}
+```
+
+**模块导出**
+
+导出一个默认对象**default**，只能有一个不可重复**export default**
+
+```js
+export default {
+  name: "test",
+};
+```
+
+**导出变量**
+
+```js
+export const a = 1;
+```
+
+### 3：Cjs 和 ESM 的区别
+
+1. Cjs 是基于运行时的同步加载，esm 是基于编译时的异步加载
+
+2. Cjs 是可以修改值的，esm 值不可修改（可读的）,指导出的值
+
+3. Cjs 不可以 tree shaking，esm 支持 tree shaking
+
+4. Cjs 中顶层的 this 指向这个模块本身，而 esm 中顶层 this 指向 undefinded
