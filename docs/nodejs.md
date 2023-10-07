@@ -330,3 +330,59 @@ export const a = 1;
 3. Cjs 不可以 tree shaking，esm 支持 tree shaking
 
 4. Cjs 中顶层的 this 指向这个模块本身，而 esm 中顶层 this 指向 undefinded
+
+## 八：全局变量
+
+### 1：globalThis
+
+在**nodejs**中使用**global**定义**全局变量**。定义的变量，可以在引入的文件中也可以访问到该变量，在**浏览器**中我们定义的全局的变量都在**window**，nodejs 在 global，不同的环境还需要判断，于是，在 ECMAScript 2020 出现了一个**globalThis**的全局变量，在 nodejs 环境会自动切换成 global，浏览器环境会自动切换成 window
+
+### 2：全局 API
+
+由于 nodejs 中没有 DOM 和 BOM，除了这些 API，其他 ECMAScript 基本都能用。
+
+```js
+__dirname;
+```
+
+表示当前模块的所在**目录**的绝对路径
+
+```js
+__filename;
+```
+
+表示当前模块**文件**的绝对路径，包括文件名和文件扩展名
+
+```js
+process;
+```
+
+1. **process.argv**：这是一个包含命令行参数的数组。第一个元素是 nodejs 的执行路径，第二个元素是当前执行 javascript 文件的路径，之后的元素是传递给脚本的命令行参数。
+2. **process.env**：这是一个包含当前环境变量的对象，可以访问并操作环境变量。
+3. **process.cwd()**：这个方法返回当前工作目录的路径。
+4. **process.on(event，listenter)**：用于注册事件监听器，可以监听诸如 exit，uncaughtException 等事件，并在事件发生时执行相应的回调函数。
+5. **process.exit([code])**：用于退出当前 nodejs 进程，code 可以提供一个可选的退出码作为参数。
+6. **process.pid**：返回当前进程的 PID（进程 pid）
+
+注意的是，**process**对象是一个全局对象，可以在任何模块中直接访问，无需导入或定义。
+
+```js
+Buffer;
+```
+
+1. 创建 Buffer 实例
+   - **Buffer.alloc(size，[，fill[，encoding]])**：创建一个指定大小的新的 Buffer 实例，初始内容为零。**fill**参数可用于填充缓冲区，**encoding**参数指定填充的字符编码。
+   - **Buffer.from(array)**：创建一个包含给定数组的 Buffer 实例。
+   - **Buffer.from(string[，encoding])**：创建一个包含给定字符串的 Buffer 实例。
+2. 读取和写入数据
+   - **buffer[index]**：通过索引读取或写入 Buffer 实例中的特定字节。
+   - **buffer.length**：获取 Buffer 实例的字节长度。
+   - **buffer.toString([encoding[，start[，end]]])**：将 Buffer 实例转换成字符串。
+3. 转换数据
+   - **buffer.toJSON()**：将 Buffer 实例转换为 JSON 对象。
+   - **buffer.slice([start[，end]])**：返回一个新的 Buffer 实例，其中包含原始 Buffer 实例的部分内容。
+4. 其他方法
+   - **Buffer.isBuffer(obj)**：检查一个对象是否是 Buffer 实例。
+   - **Buffer.concat(list[，totalLength])**：将一组 Buffer 实例或字节数组连接起来形成一个新的 Buffer 实例。
+
+**Buffer**类在处理文件，网络通信，加密和解密等操作中非常有用，尤其是在需要处理二进制数据时。
