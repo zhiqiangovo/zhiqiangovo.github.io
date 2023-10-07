@@ -230,18 +230,18 @@ npx 的运行规则和 npm 是一样的，首先本地目录查看**.bin**，看
    verdaccio
    ```
 
-   此时会开启一个默认端口为 4873 的服务，当然，也可以指定端口，如：**verdaccio --listen 9999**，也可指定安装源：**npm install --registry http://localhost:4873**
+   此时会开启一个默认端口为 4873 的服务，当然，也可以指定端口，如：**verdaccio --listen 9999**，也可指定安装源：**npm install --registry http://localhost:xxxx**
 
 3. 创建用户
 
    ```shell
-   npm adduser --registry http://localhost:4873/
+   npm adduser --registry http://localhost:xxxx/
    ```
 
 4. 发布 npm
 
 ```shell
-npm publish --registry http://localhost:4873/
+npm publish --registry http://localhost:xxx/
 ```
 
 ## 七：模块化
