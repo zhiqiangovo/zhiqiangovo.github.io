@@ -514,3 +514,170 @@ path.format({
 ```
 
 **format**正好相反，把对象转回字符串
+
+## 十一：os
+
+### 1：os 模块可以跟操作系统进行交互
+
+- **os.type()**：windows 上返回**Windows_NT**，linux 上返回**Linux**，macOS 上返回**Darwin**
+- **os.platform()**：返回标识为其编译 Node.js 二进制文件的操作系统平台字符串。可能的值为**aix**,**darwin**,**freebsd**,**linux**,**openbsd**,**sunos**,**win32**
+- **os.release()**：返回操作系统版本，如**10.0.22621**
+- **os.homedir()**：返回用户目录，如：C:\Users\zhiqi，原理就是 windows **echo %USERPROFILE%** ; posix **$HOME**
+- **os.arch()**：返回 cpu 架构，可能的值为 **arm**,**arm64**,**ia32**,**mips**,**mipsel**,**ppc**,**ppc64**,**s390**,**s390x**,**x64**
+
+### 2：获取 CPU 的线程以及详细信息
+
+```js
+os.cpus()[
+  ({
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 16952812,
+      nice: 0,
+      sys: 18975515,
+      idle: 197738250,
+      irq: 2103046,
+    },
+  },
+  {
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 15995125,
+      nice: 0,
+      sys: 16142578,
+      idle: 201528093,
+      irq: 680359,
+    },
+  },
+  {
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 17936703,
+      nice: 0,
+      sys: 17023218,
+      idle: 198705859,
+      irq: 421906,
+    },
+  },
+  {
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 13693703,
+      nice: 0,
+      sys: 15173859,
+      idle: 204798234,
+      irq: 296984,
+    },
+  },
+  {
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 13841718,
+      nice: 0,
+      sys: 10708781,
+      idle: 209115312,
+      irq: 251484,
+    },
+  },
+  {
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 16036875,
+      nice: 0,
+      sys: 11190078,
+      idle: 206438781,
+      irq: 239906,
+    },
+  },
+  {
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 19897968,
+      nice: 0,
+      sys: 13257937,
+      idle: 200509859,
+      irq: 332703,
+    },
+  },
+  {
+    model: "11th Gen Intel(R) Core(TM) i7-11390H @ 3.40GHz",
+    speed: 2918,
+    times: {
+      user: 16954578,
+      nice: 0,
+      sys: 11156437,
+      idle: 205554781,
+      irq: 193390,
+    },
+  })
+];
+```
+
+- **model**：表示 cpu 的型号信息，表示具体的描述
+- **speed**：表示 cpu 的时钟速度，以 MHz 或者 GHz 为单位。
+- **times**：是一个包含 CPU 使用时间的对象，包含以下属性：
+  - **user**：表示 CPU 被用户程序使用的时间（以毫秒为单位）
+  - **nice**：表示 CPU 被优先级较低的用户程序使用的时间（以毫秒为单位）
+  - **sys**：表示 CPU 被系统内核使用的时间（以毫秒为单位）
+  - **idle**：表示 CPU 处于空闲状态的时间（以毫秒为单位）
+  - **irq**：表示 CPU 被硬件中段处理程序使用的时间（以毫秒为单位）
+
+### 3：获取网络信息
+
+```js
+os.networkInterfaces()
+{
+  WLAN: [
+    {
+      address: 'fe80::af55:ccf8:b6fa:140f',
+      netmask: 'ffff:ffff:ffff:ffff::',
+      family: 'IPv6',
+      mac: '7c:21:4a:9a:72:3e',
+      internal: false,
+      cidr: 'fe80::af55:ccf8:b6fa:140f/64',
+      scopeid: 12
+    },
+    {
+      address: '192.168.2.119',
+      netmask: '255.255.255.0',
+      family: 'IPv4',
+      mac: '7c:21:4a:9a:72:3e',
+      internal: false,
+      cidr: '192.168.2.119/24'
+    }
+  ],
+  'Loopback Pseudo-Interface 1': [
+    {
+      address: '::1',
+      netmask: 'ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff',
+      family: 'IPv6',
+      mac: '00:00:00:00:00:00',
+      internal: true,
+      cidr: '::1/128',
+      scopeid: 0
+    },
+    {
+      address: '127.0.0.1',
+      netmask: '255.0.0.0',
+      family: 'IPv4',
+      mac: '00:00:00:00:00:00',
+      internal: true,
+      cidr: '127.0.0.1/8'
+    }
+  ]
+}
+```
+
+- **address**：表示本地回环接口的 IP 地址，这里为'127.0.0.1'
+- **netmask**：表示本地回环接口的子网掩码，这里是'255.0.0.0'
+- **family**：表示地址族（address family），这里是'IPv4',表示 IPv4 地址。
+- **mac**：表示本地回环接口 MAC 地址，这里是'00:00:00:00:00:00',注意，本地回环接口通常不涉及硬件，因此 MAC 地址通常全为零。
+- **inrernal**：表示本地回环接口是否是内部接口，这里是 true，表示它是一个内部接口。
+- **cidr**：表示本地回环接口的 CIDR 表示法，即网络地址和子网掩码的组合，这里是'127.0.0.1/8'，表示整个 127.0.0.0 网络。
