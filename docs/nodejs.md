@@ -420,3 +420,97 @@ Buffer;
 **CSR**应用例如**ToB**后台管理系统 大屏可视化 都可以采用 CSR 渲染不需要很高 SEO 支持
 
 **SSR**应用例如内容密集型应用**ToC** 新闻网站，博客网站，电子商务，门户网站
+
+## 十：Path
+
+### 1：windows posix 差异
+
+**path**模块在不同操作系统是有差异的（windows | posix）
+
+**posix**(Portable Operating System Interface of UNIX)，posix 表示可移植操作系统接口，也就是定义的标准，遵守这套标准的操作系统有（unix，likeunix，linux，macOs，Windows，wsl），定义这套标准的原因是因为希望在不同系统启动进程时调用函数的统一性。但是 windows 并没有完全遵循 posix 标准，在 windows 系统中，路径使用反斜杠（\）作为路径分隔符，这与 posix 系统使用的正斜杠（/）是不相同的，这是历史原因导致，早期 windows 采取不同设计选择。
+
+### 2：path.basename 和 path.dirname
+
+```js
+path.basename("c:/a/b/c.js"); // c.js
+```
+
+```js
+path.dirname("c:/a/b/c.js"); // c:/a/b
+```
+
+### 3：path.extname
+
+```js
+path.extname("c:/a/b/c.js")  // .js
+path.extname("c:/a/b/c.s.d.js.html"） // .html
+```
+
+用来返回扩展名，如果有多个.返回最后一个，如果没有扩展名，返回空
+
+### 4：path.join
+
+```js
+path.join("/foo", "/ikun"); //  \foo\ikun
+path.join("/foo", "/hhh", "/ikun", "../"); // \foo\hhh\
+```
+
+用来拼接路径，支持.. ./ ../操作符
+
+### 5：path.resolve
+
+用于将相对路径解析并且返回绝对路径
+
+传入多个绝对路径，它返回最右边的绝对路径
+
+```js
+path.resolve("/foo", "/hhh", "/ikun"); // C:\ikun
+```
+
+传入绝对路径+相对路径
+
+```js
+path.resolve(__dirname, "index.js"); // C:\vscodeFile\node\index.js
+```
+
+传入相对路径
+
+```js
+path.resolve("index.js"); // C:\vscodeFile\node\index.js  返回工作目录+index.js
+```
+
+### 6：path.parse 和 path.format
+
+```js
+path.parse("/a/b/c/file.txt");
+/*
+{
+  root: '/',
+  dir: '/a/b/c',
+  base: 'file.txt',
+  ext: '.txt',
+  name: 'file'
+}
+*/
+```
+
+用于解析文件路径，返回一个包含路径各个组成部分的对象
+
+- **root**：路径的根目录，即/
+- **dir**：文件所在的目录，即/a/b/c
+- **base**：文件名，即 file.txt
+- **ext**：文件扩展名，即.txt
+- **name**：文件名去除扩展名，即 file
+
+```js
+path.format({
+  root: "/",
+  dir: "/a/b/c",
+  base: "file.txt",
+  ext: ".txt",
+  name: "file",
+});
+// /a/b/c\file.txt
+```
+
+**format**正好相反，把对象转回字符串
