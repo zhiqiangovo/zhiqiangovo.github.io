@@ -681,3 +681,75 @@ os.networkInterfaces()
 - **mac**：表示本地回环接口 MAC 地址，这里是'00:00:00:00:00:00',注意，本地回环接口通常不涉及硬件，因此 MAC 地址通常全为零。
 - **inrernal**：表示本地回环接口是否是内部接口，这里是 true，表示它是一个内部接口。
 - **cidr**：表示本地回环接口的 CIDR 表示法，即网络地址和子网掩码的组合，这里是'127.0.0.1/8'，表示整个 127.0.0.0 网络。
+
+## 十二：process
+
+process 是 nodejs 操作当前进程和控制当前进程的 API，并且是挂载到 globalThis 下面的全局 API
+
+### 1：process.arch
+
+返回操作系统的 CPU 架构，与 os.arch 一样
+
+'arm'，'arm64'，'ia32'，'mips'，'mipsel'，'ppc'，'ppc64'，'s390'，'x64'
+
+### 2：process.cwd()
+
+返回当前的工作目录，如：C:\vscodeFile\node
+
+### 3：process.argv
+
+```js
+process.argv;
+// node index.js --open --hh
+/*
+[
+  'C:\\Program Files\\nodejs\\node.exe',
+  'C:\\vscodeFile\\node\\index.js',
+  '--open',
+  '--hh'
+]
+*/
+```
+
+获取执行进程后面的参数，返回是一个数组，各种 cli 脚手架也是使用这种方式接受配置参数，如：webpack
+
+### 4：process.memoryUsage()
+
+用于获取当前进程内存使用情况。该方法返回一个对象，其中包含了各种内存使用指标
+
+```js
+process.memoryUsage();
+/*
+{
+  rss: 30797824,
+  heapTotal: 6426624,
+  heapUsed: 5440472,
+  external: 422352,
+  arrayBuffers: 17382
+}
+*/
+```
+
+- res：常驻集大小，是进程当前占用的物理内存量，不包括共享内存和页面缓存，反映进程实际占用的物理内存大小
+- heapTotal：堆区总大小，是 v8 引擎为 javascript 对象分配的内存量，包括已用和未用的堆内存
+- heapUsed：已用堆大小
+- external：外部内存使用量，这部分不是由 nodejs 进程分配，而是由其他 C/C++对象或系统分配
+- arrayBuffers：用于处理二进制数据的对象类型，它使用了 Javascript 中的 ArrayBuffer 接口，这个属性显示了当前进程中 ArrayBuffers 的数量
+
+### 5：process.exit()
+
+强制进程尽快退出，即使仍有未完全完成的异步操作挂起
+
+### 6：process.kill()
+
+与 exit 类似，kill 可以杀死一个进程，接受一个参数进程 id，可以通过 process.pid 获取
+
+```js
+process.kill(process.pid);
+```
+
+### 7：process.env
+
+用于读取操作系统所有的环境变量，也可以修改和查询环境变量，注意的是，修改并不会真正影响操作系统的变量，而是只在当前线程生效，线程结束便释放。
+
+**应用场景**：区分**开发环境**和**生产环境**
