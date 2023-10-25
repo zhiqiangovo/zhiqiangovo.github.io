@@ -753,3 +753,125 @@ process.kill(process.pid);
 用于读取操作系统所有的环境变量，也可以修改和查询环境变量，注意的是，修改并不会真正影响操作系统的变量，而是只在当前线程生效，线程结束便释放。
 
 **应用场景**：区分**开发环境**和**生产环境**
+
+## 十三：child_process 子进程
+
+### 1：exec
+
+执行命令（异步执行）
+
+```js
+const { exec} = require('child_process')
+// 执行查看版本命令
+exec('node -v',(err,stdout,stderr) => {
+    console.log(stdout.toString())
+})
+// v18.18.2
+```
+
+支持的options选项
+
+```txt
+cwd <string> 子进程的当前工作目录。
+env <Object> 环境变量键值对。
+encoding <string> 默认为 'utf8'。
+shell <string> 用于执行命令的 shell。 在 UNIX 上默认为 '/bin/sh'，在 Windows 上默认为 process.env.ComSpec。 详见 Shell Requirements 与 Default Windows Shell。
+timeout <number> 默认为 0。
+maxBuffer <number> stdout 或 stderr 允许的最大字节数。 默认为 200*1024。 如果超过限制，则子进程会被终止。 查看警告： maxBuffer and Unicode。
+killSignal <string> | <integer> 默认为 'SIGTERM'。
+uid <number> 设置该进程的用户标识。（详见 setuid(2)）
+gid <number> 设置该进程的组标识。（详见 setgid(2)）
+```
+
+### 2：execSync
+
+执行命令（同步执行）
+
+```js
+const { exec, execSync} = require('child_process')
+const res = execSync('node -v')
+console.log(res.toString())  // // v18.18.2
+// 打开百度并进入无痕模式
+execSync("start chrome http://www.baidu.com --incognito") 
+```
+
+### 3：execFile
+
+execFile适合执行可执行文件。例如执行一个node脚本，或者shell文件，windows可以编写cmd脚本，posix可以编写脚本
+
+**bat.cmd**
+
+```cmd
+echo '开始'
+mkdir test
+cd ./test
+echo cconsole.log('test123456') > test.js
+echo '结束'
+node test.js
+```
+
+**index.js**
+
+```js
+const {execFile} = require('child_process')
+const path = require('path')
+execFile(path.resolve(process.cwd(),'./bat.cmd'),null,(err,stdout) => {
+    console.log(stdout.toString())
+})
+```
+
+### 4：spawn
+
+**spawn**用于执行一些实时获取的信息，因为spawn返回的是流，边执行边返回。**exec**是返回一个完整的buffer，buffer的大小是200k，如果超出会报错，而**spawn**是无上限的。
+
+**spawn**在执行完成后会抛出close事件监听，并返回状态码，通过状态码可以知道子进程是否顺利执行。**exec**只能通过返回的buffer去识别完成状态，识别起来比较麻烦。
+
+```js
+const { exec, execSync, execFile,spawn} = require('child_process')
+const command = spawn('netstat')
+command.stdout.on ("data",(stream) => {
+    console.log(stream.toString())
+})
+command.on("close",()=> {
+    console.log('结束了')
+})
+```
+
+**exec底层是通过execFile实现，execFile底层是通过spawn实现**
+
+### 5：fork
+
+使用场景为大量计算，或者容易阻塞主线程操作的一些代码，就适合开发fork
+
+index.js
+
+```js
+const { fork} = require('child_process')
+const testProcess = fork('./test.js')
+testProcess.send('我是主进程')
+testProcess.on('message',(data) => {
+    console.log('我是主进程接受消息111:',data)
+})
+```
+
+test.js
+
+```js
+process.on('message',(data) => {
+    console.log('子进程接受消息',data)
+})
+process.send('我是子进程')
+```
+
+输出：
+
+```js
+我是主进程接受消息111: 我是子进程
+子进程接受消息 我是主进程
+```
+
+send发送消息，message接受消息，可以相互发送接收
+
+fork底层使用的是IPC通道进行通讯的
+
+![](./public/node/child_process.png)
