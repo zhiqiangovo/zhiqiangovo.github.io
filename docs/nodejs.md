@@ -875,3 +875,59 @@ send发送消息，message接受消息，可以相互发送接收
 fork底层使用的是IPC通道进行通讯的
 
 ![](./public/node/child_process.png)
+
+## 十四：events
+
+### 1：EventEmitter
+
+Node.js核心API都是采用**异步事件驱动架构**，简单来说就是通过有效的方法来监听事件状态的变化，并在变化的时候做出相应的动作。
+
+```js
+const EventEmitter = require('events')
+const bus =new EventEmitter();
+bus.on('test',data => {
+    console.log(data)
+})
+bus.emit('test','xxxxxx')
+```
+
+### 2：事件模型
+
+Node.js事件模型采用了**发布订阅者设计模式**
+
+![](./public/node/subon.png)
+
+当一个发布者有新消息时，就将这个消息发布到调度中心。调度中心就会将这个消息通知给所有订阅者。这就实现了发布者和订阅者之间的解耦，发布者和订阅者不再直接依赖彼此，他们可以独立地扩展自己。
+
+监听消息数量的默认是**10**个，可以调用**setMaxListeners**传入数量来解除限制
+
+```js
+event.setMaxListeners(20)
+```
+
+只想监听一次使用**once**，即使emit派发多次也只触发一次
+
+```js
+const EventEmitter = require('events')
+const bus =new EventEmitter();
+bus.once('test',data => {
+    console.log(data)
+})
+bus.emit('test','xxxxxx')
+bus.emit('test','xxxxxx')
+bus.emit('test','xxxxxx')
+```
+
+取消侦听使用**off**
+
+```js
+const EventEmitter = require('events')
+const bus =new EventEmitter();
+const fn = data => {
+    console.log(data)
+}
+bus.on('test',fn)
+bus.off('test',fn)
+bus.emit('test','xxxxxx')
+```
+
