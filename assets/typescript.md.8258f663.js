@@ -1,1 +1,0 @@
-import{_ as t,o as e,c as a}from"./chunks/framework.d24d905d.js";const m=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"typescript.md","filePath":"typescript.md","lastUpdated":1692111590000}'),r={name:"typescript.md"};function s(p,c,o,n,i,d){return e(),a("div")}const f=t(r,[["render",s]]);export{m as __pageData,f as default};
