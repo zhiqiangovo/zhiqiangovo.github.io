@@ -32,10 +32,6 @@ export default defineConfig({
       typescript: [
         {
           text: "typescript",
-          items: [
-            { text: "Markdown typescript", link: "/markdown-examples" },
-            { text: "Runtime API typescript", link: "/api-examples" },
-          ],
         },
       ],
     },
