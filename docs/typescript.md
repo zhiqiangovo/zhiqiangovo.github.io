@@ -397,3 +397,79 @@ function fn(params: number): void {}
 function fn(params: number, params1: string): void {}
 function fn(params: any, params1?: any): void {}
 ```
+
+## 七：联合类型
+
+```typescript
+const a: string | number = "111";
+const fn = (x: number | boolean): boolean => {
+  return !!x;
+};
+```
+
+## 八：交叉类型
+
+**多种类型的集合**，联合对象将具有所联合类型的所有成员
+
+```typescript
+interface People {
+  age: number;
+  height: number;
+}
+interface Man {
+  sex: string;
+}
+const a = (man: People & Man) => {
+  console.log("111");
+};
+```
+
+## 九：类型断言
+
+语法： **值 as 类型**； **<类型>值**
+
+```typescript
+interface A {
+  run: string;
+}
+interface B {
+  bulid: string;
+}
+const fn = (type: A | B): string => {
+  return (type as A).run;
+};
+```
+
+**类型断言**只能够欺骗 TypeScript 编译器，无法避免运行时的错误，滥用时可能会导致运行时错误
+
+- **使用 any 临时断言**
+
+  ```typescript
+  (window as any).abc = 123;
+  ```
+
+- **as const**
+
+  是对字面值的断言，与 const 直接定义常量是有区别的
+
+  如果是**普通类型**，直接与 const 声明一致
+
+  ```typescript
+  const a = "hhh";
+  a = "rrr"; // 无法修改
+
+  let b = "hhh" as const;
+  b = "rrr"; // 无法修改
+  ```
+
+  如果是**数组**
+
+  ```typescript
+  let a1 = [10, 20] as const;
+  const a2 = [10, 20];
+
+  a1.unshift(2); // 错误，此时已经断言为字面量[10,20],数据无法做任何修改
+  a2.unshift(1); // 通过，没有修改指针
+  ```
+
+  **类型断言是不具影响力的，因为编译过程中会删除类型断言**
