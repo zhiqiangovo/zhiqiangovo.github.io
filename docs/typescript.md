@@ -473,3 +473,289 @@ const fn = (type: A | B): string => {
   ```
 
   **类型断言是不具影响力的，因为编译过程中会删除类型断言**
+
+## 十：内置对象
+
+### 1：ECMAScript 的内置对象
+
+**Boolean，Number，String，RegExp，Date，Error**
+
+```typescript
+let b: Boolean = new Boolean(1);
+let n: Number = new Number(true);
+let s: String = new String("hello");
+let d: Date = new Date();
+let r: RegExp = /^1/;
+let e: Error = new Error("error");
+```
+
+### 2：DOM 和 BOM 的内置对象
+
+**Document，HTMLElement，Event，NodeList**
+
+```typescript
+let body: HTMLElement = document.body;
+let allDiv: NodeList = document.querySelectorAll("div");
+// 读取div时需要类型断言，或者加个判断应为都不到返回null
+let div: HTMLElement = document.querySelector("div") as HTMLDivElement;
+```
+
+**dom 元素映射表**
+
+```typescript
+interface HTMLElementTagNameMap {
+  a: HTMLAnchorElement;
+  abbr: HTMLElement;
+  address: HTMLElement;
+  applet: HTMLAppletElement;
+  area: HTMLAreaElement;
+  article: HTMLElement;
+  aside: HTMLElement;
+  audio: HTMLAudioElement;
+  b: HTMLElement;
+  base: HTMLBaseElement;
+  bdi: HTMLElement;
+  bdo: HTMLElement;
+  blockquote: HTMLQuoteElement;
+  body: HTMLBodyElement;
+  br: HTMLBRElement;
+  button: HTMLButtonElement;
+  canvas: HTMLCanvasElement;
+  caption: HTMLTableCaptionElement;
+  cite: HTMLElement;
+  code: HTMLElement;
+  col: HTMLTableColElement;
+  colgroup: HTMLTableColElement;
+  data: HTMLDataElement;
+  datalist: HTMLDataListElement;
+  dd: HTMLElement;
+  del: HTMLModElement;
+  details: HTMLDetailsElement;
+  dfn: HTMLElement;
+  dialog: HTMLDialogElement;
+  dir: HTMLDirectoryElement;
+  div: HTMLDivElement;
+  dl: HTMLDListElement;
+  dt: HTMLElement;
+  em: HTMLElement;
+  embed: HTMLEmbedElement;
+  fieldset: HTMLFieldSetElement;
+  figcaption: HTMLElement;
+  figure: HTMLElement;
+  font: HTMLFontElement;
+  footer: HTMLElement;
+  form: HTMLFormElement;
+  frame: HTMLFrameElement;
+  frameset: HTMLFrameSetElement;
+  h1: HTMLHeadingElement;
+  h2: HTMLHeadingElement;
+  h3: HTMLHeadingElement;
+  h4: HTMLHeadingElement;
+  h5: HTMLHeadingElement;
+  h6: HTMLHeadingElement;
+  head: HTMLHeadElement;
+  header: HTMLElement;
+  hgroup: HTMLElement;
+  hr: HTMLHRElement;
+  html: HTMLHtmlElement;
+  i: HTMLElement;
+  iframe: HTMLIFrameElement;
+  img: HTMLImageElement;
+  input: HTMLInputElement;
+  ins: HTMLModElement;
+  kbd: HTMLElement;
+  label: HTMLLabelElement;
+  legend: HTMLLegendElement;
+  li: HTMLLIElement;
+  link: HTMLLinkElement;
+  main: HTMLElement;
+  map: HTMLMapElement;
+  mark: HTMLElement;
+  marquee: HTMLMarqueeElement;
+  menu: HTMLMenuElement;
+  meta: HTMLMetaElement;
+  meter: HTMLMeterElement;
+  nav: HTMLElement;
+  noscript: HTMLElement;
+  object: HTMLObjectElement;
+  ol: HTMLOListElement;
+  optgroup: HTMLOptGroupElement;
+  option: HTMLOptionElement;
+  output: HTMLOutputElement;
+  p: HTMLParagraphElement;
+  param: HTMLParamElement;
+  picture: HTMLPictureElement;
+  pre: HTMLPreElement;
+  progress: HTMLProgressElement;
+  q: HTMLQuoteElement;
+  rp: HTMLElement;
+  rt: HTMLElement;
+  ruby: HTMLElement;
+  s: HTMLElement;
+  samp: HTMLElement;
+  script: HTMLScriptElement;
+  section: HTMLElement;
+  select: HTMLSelectElement;
+  slot: HTMLSlotElement;
+  small: HTMLElement;
+  source: HTMLSourceElement;
+  span: HTMLSpanElement;
+  strong: HTMLElement;
+  style: HTMLStyleElement;
+  sub: HTMLElement;
+  summary: HTMLElement;
+  sup: HTMLElement;
+  table: HTMLTableElement;
+  tbody: HTMLTableSectionElement;
+  td: HTMLTableDataCellElement;
+  template: HTMLTemplateElement;
+  textarea: HTMLTextAreaElement;
+  tfoot: HTMLTableSectionElement;
+  th: HTMLTableHeaderCellElement;
+  thead: HTMLTableSectionElement;
+  time: HTMLTimeElement;
+  title: HTMLTitleElement;
+  tr: HTMLTableRowElement;
+  track: HTMLTrackElement;
+  u: HTMLElement;
+  ul: HTMLUListElement;
+  var: HTMLElement;
+  video: HTMLVideoElement;
+  wbr: HTMLElement;
+}
+```
+
+### 3：定义 Promise
+
+如果我们不指定返回的类型，TS 是推断不出来返回的是什么类型
+
+```typescript
+function promise(): Promise<number> {
+  return new Promise<number>((resolve, reject) => {
+    resolve(1);
+  });
+}
+promise().then((res) => {
+  console.log(res);
+});
+```
+
+当我们在使用一些常用的方法的时候，TS 实际上已经帮我们做了很多类型推断的工作了，而他们定义的文件，则在**TS 核心库**的定义文件中
+
+## 十一：Class
+
+ES6 提供了更接近传统语言的写法，引入了 Class（类）这个概念，作为对象的模板。通过 class 关键字，可以定义类。基本上，ES6 的 class 可以看做只是一个**语法糖**，它的绝大部分功能，ES5 都可以做到，新的 class 写法只是让**对象的原型的写法更加清晰**，更加**面向对象编程**的语法而已。
+
+### 1：定义类
+
+```typescript
+class Person {
+  name: string;
+  age: number;
+  constructor(name: string, age: number) {
+    this.name = name;
+    this.age = age;
+  }
+  run() {}
+}
+```
+
+### 2：类的修饰符
+
+**public，private，protected**
+
+```typescript
+class Person {
+  public name: string;
+  private age: number;
+  protected some: any;
+  constructor(name: string, age: number, some: any) {
+    this.name = name;
+    this.age = age;
+    this.some = some;
+  }
+  run() {}
+}
+```
+
+**public**修饰符：定义的变量**内部访问**，**也可以外部访问**
+
+**private**修饰符：定义的变量私有，只能在**内部访问**，**不能在外部访问**
+
+**protected**修饰符：定义的变量私有，只能在**内部和继承的子类**中访问，**不能在外部访问**
+
+### 3：静态属性和静态方法
+
+```typescript
+class Person {
+  static nb: string;
+  constructor() {}
+  static run() {
+    this.aaa();
+  }
+  static aaa() {}
+}
+Person.nb;
+```
+
+我们用 static 定义的**属性**，不可以通过 this 去访问，只能通过**类名去调用**；static 静态**函数**，同样也是不能通过 this 去调用，也是通过**类名去调用**
+
+注：**如果两个函数都是 static 静态的是可以通过 this 互相调用**
+
+### 4：interface 定义 类
+
+```typescript
+interface PersonClass {
+  get(type: boolean): boolean;
+}
+interface PersonClass2 {
+  set(): void;
+  asd: string;
+}
+class A {
+  name: string;
+  constructor() {
+    this.name = "123";
+  }
+}
+class Person extends A implements PersonClass, PersonClass2 {
+  asd: string;
+  constructor() {
+    super();
+    this.asd = "123";
+  }
+  get(type: boolean): boolean {
+    return type;
+  }
+  set(): void {}
+}
+```
+
+### 5：抽象类
+
+应用场景：如果你写的类实例化之后毫无用处，此时我们可以把他定义为抽象类，或者，你也可以把他作为一个**基类->通过继承一个派生类去实现基类的一些方法**
+
+```typescript
+abstract class ABC {
+  name: string;
+  constructor(name: string) {
+    this.name = name;
+  }
+  print(): string {
+    return this.name;
+  }
+  abstract getName(): string;
+}
+
+class BBB extends ABC {
+  constructor() {
+    super("xx");
+  }
+  getName(): string {
+    return this.name;
+  }
+}
+let b = new BBB();
+```
+
+我们在 ABC 类中定义了 getName 抽象方法但未实现，我们 BBB 类实现了 ABC 定义的抽象方法，如不实现就不报错，**我们定义的抽象方法必须在派生类实现**
