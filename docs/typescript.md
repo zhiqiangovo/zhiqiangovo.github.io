@@ -759,3 +759,261 @@ let b = new BBB();
 ```
 
 我们在 ABC 类中定义了 getName 抽象方法但未实现，我们 BBB 类实现了 ABC 定义的抽象方法，如不实现就不报错，**我们定义的抽象方法必须在派生类实现**
+
+## 十二：元组类型
+
+如果需要一个**固定大小的不同类型值**的集合，我们需要使用元组
+
+**元组**就是数组的变种，元组是固定数量的不同类型的元素的组合。元组与集合的不同之处在于，元组中的**元素类型可以是不同**的，而且**数量固定**。元组的好处在于可以把多个元素作为一个单元传递。如果一个方法需要返回多个值，可以把这多个值作为元组返回，而不需要创建额外的类来表示。
+
+```typescript
+const arr: [number, string] = [1, "2"];
+// 可以支持访问
+arr[1].length;
+```
+
+元组类型还可以支持**自定义名称**和变为**可选**的
+
+```typescript
+const arr1: [x: number, y?: string] = [1];
+```
+
+对于**越界元素**
+
+```typescript
+const arr: [number, string] = [1, "2"];
+arr.push(true); // 报错  （number | string）
+```
+
+此时，它的类型被限制为联合类型
+
+**应用场景**：定义 excel 返回的数据
+
+```typescript
+let excel: [string, number, string][] = [
+  ["title", 1, "hh"],
+  ["title", 2, "hh"],
+];
+```
+
+## 十三：枚举类型
+
+### 1：数字枚举
+
+```typescript
+enum Types {
+  Red,
+  Blue,
+  Yellow,
+}
+// 分别代表 红色0，蓝色1，黄色2
+```
+
+- 增长枚举
+
+  ```typescript
+  enum Types {
+    Red = 2,
+    Blue,
+    Yellow,
+  }
+  // 成员会从2自动增长
+  // 分别代表 红色2，蓝色3，黄色4
+  ```
+
+### 2：字符串枚举
+
+在字符串枚举里，每个成员都必须用**字符串字面量**，或另外一个字符串枚举成员进行**初始化**
+
+```typescript
+enum Types {
+  Red = "red",
+  Blue = "blue",
+  Yellow = "yellow",
+}
+```
+
+由于字符串没有自增长的行为，字符串枚举可以很好的**序列化**。字符串枚举允许你提供一个运行时有意义并且可读的值，独立于枚举成员的名字。
+
+### 3：异构枚举
+
+```typescript
+enum Types {
+  No = "No",
+  Yes = 1,
+}
+```
+
+### 4：接口枚举
+
+```typescript
+enum Types {
+  yyds,
+  dddd,
+}
+interface A {
+  red: Types.yyds;
+}
+// 声明对象时也要遵循这个规则
+let obj: A = {
+  red: Types.yyds,
+};
+```
+
+### 5：const 枚举
+
+let 和 var 都是不允许的声明，只能使用**const**。
+
+大多数情况下，枚举是十分有效的方案。然而在某些情况下很严格，为了避免在额外生成的代码上的开销和额外的非直接的对枚举成员的访问，我们可以使用 const 枚举。**常量枚举**通过在枚举上使用 const 修饰符来定义。
+
+**const 声明**的枚举会被编译成常量
+
+```typescript
+const enum Types {
+  No = "No",
+  Yes = 1,
+}
+console.log(Types.No);
+console.log(Types.Yes);
+```
+
+编译后
+
+```typescript
+console.log("No" /* Types.No */);
+console.log(1 /* Types.Yes */);
+```
+
+**普通声明**的枚举编译完后是个对象
+
+```typescript
+enum Types {
+  No = "No",
+  Yes = 1,
+}
+console.log(Types.No);
+console.log(Types.Yes);
+```
+
+编译后
+
+```typescript
+var Types;
+(function (Types) {
+  Types["No"] = "No";
+  Types[(Types["Yes"] = 1)] = "Yes";
+})(Types || (Types = {}));
+console.log(Types.No);
+console.log(Types.Yes);
+```
+
+### 6：反向映射
+
+包含**正向映射（name-->value）**和**反向映射（value-->name）**
+
+```typescript
+enum Types {
+  fall,
+}
+let a = Types.fall;
+console.log(a); // 0
+let nameOa = Types[a];
+console.log(nameOa); // fall
+```
+
+## 十四：类型推论|类型别名
+
+### 1：类型推论
+
+TS 会在没有明确指定类型的时候推测出一个类型，这就是**类型推论**
+
+```typescript
+let str = "rrrrr"; // 推断出为string
+```
+
+如果你声明的变量没有定义类型也没有赋值，此时就会推断为**any**，进行任意操作
+
+```typescript
+let str; // 推断为any类型
+```
+
+### 2：类型别名
+
+**type**关键字（可以给一个类型定义一个名字）多用于复合类型
+
+```typescript
+type str = string;
+let a: str = "@@";
+
+// 定义函数别名
+type hh = () => string;
+const b: hh = () => "sss";
+
+// 定义联合类型别名
+type c = string | number;
+const f = "eee";
+
+// 定义值的别名
+type value = boolean | "0" | 123;
+const d: value = "0";
+```
+
+**interface 和 type 的区别**
+
+1. interface 可以继承，type 只能通过&交叉类型合并
+2. type 可以定义联合类型和可以使用一些操作符，interface 不行
+3. interface 遇到重名的会合并，type 不行
+
+## 十五：never 类型
+
+TS 将使用**never**类型来表示不应该存在的状态
+
+```typescript
+// 返回never的函数必须存在无法达到的终点
+// 因为必定抛出异常，所以error将不会有返回值
+function error(message: string): never {
+  throw new Error(message);
+}
+// 因为存在死循环，所以loop将不会有返回值
+function loop(): never {
+  while (true) {}
+}
+```
+
+**never 和 void 的差异**
+
+```typescript
+// void类型只是没有返回值，但本身不会出错
+function Void(): void {
+  console.log();
+}
+// 只会抛出异常没有返回值
+function Never(): never {
+  throw new Error("aaa");
+}
+```
+
+```typescript
+type A = void | number | never;
+// 只显示void和number，never在联合类型中会被移除
+```
+
+**应用场景：**
+
+```typescript
+type A = "A" | "B" | "C";
+function isAA(value: A) {
+  switch (value) {
+    case "A":
+      break;
+    case "B":
+      break;
+    case "C":
+      break;
+    default:
+      // 用于场景兜底逻辑
+      const error: never = value;
+      return error;
+  }
+}
+```
