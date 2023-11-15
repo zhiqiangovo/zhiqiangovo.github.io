@@ -1017,3 +1017,346 @@ function isAA(value: A) {
   }
 }
 ```
+
+## 十六：symbol 类型
+
+### 1：创建
+
+symbol 类型的值是通过**Symbol**函数调用创建的，可以传递参数作为唯一标识，只支持**string**和**number**类型的参数。
+
+```typescript
+const s1 = Symbol();
+const s2 = Symbol("key");
+```
+
+symbol 值是**唯一**的
+
+```typescript
+const s1 = Symbol();
+const s2 = Symbol();
+// s1 === s2 false
+```
+
+### 2：用作对象的键
+
+```typescript
+const s1 = Symbol();
+let obj = {
+  [s1]: "value",
+};
+console.log(obj[s1]);
+```
+
+### 3：不能通过如下方式遍历到
+
+```typescript
+const s1 = Symbol("666");
+const s2 = Symbol("777");
+let obj = {
+  [s1]: "value",
+  [s2]: "kkk",
+  age: 19,
+  sex: "女",
+};
+// 1：for in 遍历不到symbol类型
+for (const key in obj) {
+  console.log(key); // age,sex
+}
+// 2: Object.keys(obj)
+console.log(Object.keys(obj)); // [ 'age', 'sex' ]
+// 3: Object.getOwnPropertyNames(obj)
+console.log(Object.getOwnPropertyNames(obj)); // [ 'age', 'sex' ]
+// 4: JSON.stringify(obj)
+console.log(JSON.stringify(obj)); // {"age":19,"sex":"女"}
+```
+
+如何拿到
+
+```typescript
+// 1: Object.getOwnPropertySymbols(obj)
+console.log(Object.getOwnPropertySymbols(obj)); //  [ Symbol(666), Symbol(777) ]
+// 2: Reflect.ownKeys(obj)
+console.log(Reflect.ownKeys(obj)); // [ 'age', 'sex', Symbol(666), Symbol(777) ]
+```
+
+### 4：Symbol 迭代器和生成器 for of
+
+```typescript
+const arr = [1, 2, 3];
+let iterator: any = arr[Symbol.iterator]();
+console.log(iterator.next()); // { value: 1, done: false }
+console.log(iterator.next()); // { value: 2, done: false }
+console.log(iterator.next()); // { value: 3, done: false }
+console.log(iterator.next()); // { value: undefined, done: true }
+```
+
+**for ... of** 其实就是迭代器的语法糖，for ... of 不能循环没有 iterator 的对象
+
+**数组解构**的原理也是调用迭代器
+
+### 5：API 列表
+
+**Symbol.hasInstance**：方法，会被 instanceof 运算符调用。构造器对象用来识别一个对象是否是其实例。
+
+**Symbol.isConcatSpreadable**：布尔值，表示当在一个对象上调用 Array.prototype.concat 时，这个对象的数组元素是否可展开。
+
+**Symbol.iterator**：方法，被 for-of 语句调用。返回对象的默认迭代器。
+
+**Symbol.match**：方法，被 String.prototype.match 调用。正则表达式用来匹配字符串。
+
+**Symbol.replace**：方法，被 String.prototype.replace 调用。正则表达式用来替换字符串中匹配的子串。
+
+**Symbol.search**：方法，被 String.prototype.search 调用。正则表达式返回被匹配部分在字符串中的索引。
+
+**Symbol.species**：函数值，为一个构造函数。用来创建派生对象。
+
+**Symbol.split**：方法，被 String.prototype.split 调用。正则表达式来用分割字符串。
+
+**Symbol.toPrimitive**：方法，被 ToPrimitive 抽象操作调用。把对象转换为相应的原始值。
+
+**Symbol.toStringTag**：方法，被内置方法 Object.prototype.toString 调用。返回创建对象时默认的字符串描述。
+
+**Symbol.unscopables**：对象，它自己拥有的属性会被 with 作用域排除在外。
+
+## 十七：泛型
+
+### 1：创建
+
+可以理解为**动态类型**
+
+```typescript
+function add<T>(a: T, b: T): Array<T> {
+  return [a, b];
+}
+```
+
+```typescript
+function add<T, U>(a: T, b: U): Array<T | U> {
+  const params: Array<T | U> = [a, b];
+  return params;
+}
+```
+
+### 2：定义泛型接口
+
+```typescript
+interface MyInter<T> {
+  (arg: T): T;
+}
+function fn<T>(arg: T): T {
+  return arg;
+}
+let result: MyInter<number> = fn;
+result(123);
+```
+
+### 3：对象字面量泛型
+
+```typescript
+let foo: {
+  <T>(arg: T): T;
+};
+foo = function <T>(arg: T): T {
+  return arg;
+};
+foo(112);
+```
+
+### 4：泛型约束
+
+约束其具有 length 的属性
+
+```typescript
+interface len {
+  length: number;
+}
+function getLength<T extends len>(arg: T) {
+  return arg.length;
+}
+getLength<string>("123");
+```
+
+### 5：使用 keyof 约束对象
+
+使用**TS 泛型**和**泛型约束**。首先定义了 T 类型并使用关键字继承 obj 类型的子类型，然后使用 keyof 操作符获取 T 类型的所有键，它的返回类型是联合类型，最后利用 extends 关键字约束 K 类型必须为 keyof T 联合类型的子类型。
+
+```typescript
+function prop<T, K extends keyof T>(obj: T, key: K) {
+  return obj[key];
+}
+let o = { a: 1, b: 2, c: 3 };
+prop(o, "a");
+prop(o, "d"); // 报错发现找不到
+```
+
+### 6：泛型类
+
+```typescript
+class Sub<T> {
+  attr: T[] = [];
+  add(a: T): T[] {
+    return [a];
+  }
+}
+
+let s = new Sub<number>();
+s.attr = [1, 2, 3];
+s.add(123);
+```
+
+## 十八：tsconfig.json 配置
+
+```json
+"compilerOptions": {
+  "incremental": true, // TS编译器在第一次编译之后会生成一个存储编译信息的文件，第二次编译会在第一次的基础上进行增量编译，可以提高编译的速度
+  "tsBuildInfoFile": "./buildFile", // 增量编译文件的存储位置
+  "diagnostics": true, // 打印诊断信息
+  "target": "ES5", // 目标语言的版本
+  "module": "CommonJS", // 生成代码的模板标准
+  "outFile": "./app.js", // 将多个相互依赖的文件生成一个文件，可以用在AMD模块中，即开启时应设置"module": "AMD",
+  "lib": ["DOM", "ES2015", "ScriptHost", "ES2019.Array"], // TS需要引用的库，即声明文件，es5 默认引用dom、es5、scripthost,如需要使用es的高级版本特性，通常都需要配置，如es8的数组新特性需要引入"ES2019.Array",
+  "allowJS": true, // 允许编译器编译JS，JSX文件
+  "checkJs": true, // 允许在JS文件中报错，通常与allowJS一起使用
+  "outDir": "./dist", // 指定输出目录
+  "rootDir": "./", // 指定输出文件目录(用于输出)，用于控制输出目录结构
+  "declaration": true, // 生成声明文件，开启后会自动生成声明文件
+  "declarationDir": "./file", // 指定生成声明文件存放目录
+  "emitDeclarationOnly": true, // 只生成声明文件，而不会生成js文件
+  "sourceMap": true, // 生成目标文件的sourceMap文件
+  "inlineSourceMap": true, // 生成目标文件的inline SourceMap，inline SourceMap会包含在生成的js文件中
+  "declarationMap": true, // 为声明文件生成sourceMap
+  "typeRoots": [], // 声明文件目录，默认时node_modules/@types
+  "types": [], // 加载的声明文件包
+  "removeComments":true, // 删除注释
+  "noEmit": true, // 不输出文件,即编译后不会生成任何js文件
+  "noEmitOnError": true, // 发送错误时不输出任何文件
+  "noEmitHelpers": true, // 不生成helper函数，减小体积，需要额外安装，常配合importHelpers一起使用
+  "importHelpers": true, // 通过tslib引入helper函数，文件必须是模块
+  "downlevelIteration": true, // 降级遍历器实现，如果目标源是es3/5，那么遍历器会有降级的实现
+  "strict": true, // 开启所有严格的类型检查
+  "alwaysStrict": true, // 在代码中注入'use strict'
+  "noImplicitAny": true, // 不允许隐式的any类型
+  "strictNullChecks": true, // 不允许把null、undefined赋值给其他类型的变量
+  "strictFunctionTypes": true, // 不允许函数参数双向协变
+  "strictPropertyInitialization": true, // 类的实例属性必须初始化
+  "strictBindCallApply": true, // 严格的bind/call/apply检查
+  "noImplicitThis": true, // 不允许this有隐式的any类型
+  "noUnusedLocals": true, // 检查只声明、未使用的局部变量(只提示不报错)
+  "noUnusedParameters": true, // 检查未使用的函数参数(只提示不报错)
+  "noFallthroughCasesInSwitch": true, // 防止switch语句贯穿(即如果没有break语句后面不会执行)
+  "noImplicitReturns": true, //每个分支都会有返回值
+  "esModuleInterop": true, // 允许export=导出，由import from 导入
+  "allowUmdGlobalAccess": true, // 允许在模块中全局变量的方式访问umd模块
+  "moduleResolution": "node", // 模块解析策略，ts默认用node的解析策略，即相对的方式导入
+  "baseUrl": "./", // 解析非相对模块的基地址，默认是当前目录
+  "paths": { // 路径映射，相对于baseUrl
+    // 如使用jq时不想使用默认版本，而需要手动指定版本，可进行如下配置
+    "jquery": ["node_modules/jquery/dist/jquery.min.js"]
+  },
+  "rootDirs": ["src","out"], // 将多个目录放在一个虚拟目录下，用于运行时，即编译后引入文件的位置可能发生变化，这也设置可以虚拟src和out在同一个目录下，不用再去改变路径也不会报错
+  "listEmittedFiles": true, // 打印输出文件
+  "listFiles": true// 打印编译的文件(包括引用的声明文件)
+}
+
+// 指定一个匹配列表（属于自动指定该路径下的所有ts相关文件）
+"include": [
+   "src/**/*"
+],
+// 指定一个排除列表（include的反向操作）
+ "exclude": [
+   "demo.ts"
+],
+// 指定哪些文件使用该配置（属于手动一个个指定文件）
+ "files": [
+   "demo.ts"
+]
+```
+
+## 十九：命名空间
+
+TS 提供命名空间**避免全局变量造成的污染**。
+
+- 内部模块，主要用于**组织代码**，避免冲突。
+- 命名空间内的类**默认私有**
+- 通过**export**暴露
+- 通过**namespace**关键字定义
+
+### 1：定义
+
+```typescript
+namespace a {
+  export const Time: number = 100;
+  export const fn = <T>(arg: T): T => {
+    return arg;
+  };
+  fn(Time);
+}
+namespace b {
+  export const Time: number = 1000;
+  export const fn = <T>(arg: T): T => {
+    return arg;
+  };
+  fn(Time);
+}
+console.log(a.Time); // 100
+```
+
+### 2：嵌套的命名空间
+
+```typescript
+namespace b {
+  export namespace n {
+    export class Vue {
+      parameters: string;
+      constructor(parameters: string) {
+        this.parameters = parameters;
+      }
+    }
+  }
+}
+let v = b.n.Vue;
+new v("1");
+```
+
+### 3：抽离命名空间
+
+a.ts
+
+```typescript
+export namespace v {
+  export const a = 1;
+}
+```
+
+b.ts
+
+```typescript
+import { v } from "./a";
+console.log(v);
+```
+
+### 4：简化命名空间
+
+```typescript
+namespace A {
+  export namespace B {
+    export const C = 1;
+  }
+}
+
+import X = A.B.C;
+console.log(X);
+```
+
+### 5：重名的命名空间会合并
+
+```typescript
+namespace a {
+  export const b = 234;
+}
+namespace a {
+  export const c = 22;
+}
+a.c;
+a.b;
+```
