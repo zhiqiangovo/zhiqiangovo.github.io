@@ -1360,3 +1360,51 @@ namespace a {
 a.c;
 a.b;
 ```
+
+## 二十：Mixins 混入
+
+### 1：对象的混入
+
+使用 Object.assign 合并多个对象
+
+```typescript
+interface Name {
+  name: string;
+}
+interface Age {
+  age: number;
+}
+interface Sex {
+  sex: number;
+}
+let people1: Name = { name: "hhhh" };
+let people2: Age = { age: 10 };
+let people3: Sex = { sex: 1 };
+
+const people = Object.assign(people1, people2, people3);
+// 此时people会推推断为一个交叉类型 Name & Age & Sex
+```
+
+### 2：类的混入
+
+```typescript
+class A {
+  type: boolean = false;
+  changeType() {
+    this.type = !this.type;
+  }
+}
+
+class B {
+  name: string = "zs";
+  getName(): string {
+    return this.name;
+  }
+}
+class C implements A, B {
+  type: boolean;
+  changeType(): void {}
+  name: string;
+  getName(): string {}
+}
+```
