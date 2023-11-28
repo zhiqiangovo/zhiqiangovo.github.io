@@ -930,4 +930,62 @@ bus.on('test',fn)
 bus.off('test',fn)
 bus.emit('test','xxxxxx')
 ```
+## 十五：util
 
+util是node.js内部提供的很多实用或者工具类型的API，方便我们快速开发。
+
+### 1：util.promisify
+
+将回调函数类型变成promise风格
+
+```js
+import { exec } from "node:child_process";
+import util from "node:util";
+const execPromise = util.promisify(exec);
+execPromise("node -v")
+  .then((res) => {
+    console.log(res);
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+// { stdout: 'v18.18.2\r\n', stderr: '' }
+```
+
+### 2：util.callbackify
+
+```js
+import util from "node:util";
+const fn = (type) => {
+  if (type === 1) {
+    return Promise.resolve("test");
+  } else {
+    return Promise.reject("error");
+  }
+};
+const callback = util.callbackify(fn);
+callback(1, (err, val) => {
+  console.log(err, val);
+});
+// null test
+```
+
+### 3：util.format
+
+格式化
+
+```js
+import util from "node:util";
+console.log(util.format("%s---%s", "foo", "bar"));
+// foo---bar
+```
+
+- **%s**：**string** 将用于转换除**BigInt**，**Object**和**-0**之外的所有值。**BigInt**值将用n表示，没有用户定义的toString函数的对象使用具有选项**{depth：0，colors：false，compact：3}**的**util.inspect()**进行检查。
+- **%d**：**Number** 将用于转换除**BigInt**和**Symbol**之外的所有值。
+- **%i**：**parseInt(value,10)**  用于除**BigInt**和**Symbol**之外的所有值。
+- **%f**：**parseFloat(value)**  用于除**Symbol**之外的所有值。
+- **%j**：**JSON**。如果参数包含循环引用，则替换为字符串 **'[Circular]'**。
+- **%o**：**Object**。具有通用 JavaScript 对象格式的对象的字符串表示形式。 类似于具有选项 **{ showHidden: true, showProxy: true }**的 **util.inspect()**。 这将显示完整的对象，包括不可枚举的属性和代理。
+- **%O**：**Object**. 具有通用 JavaScript 对象格式的对象的字符串表示形式。 类似于没有选项的 **util.inspect()**。 这将显示完整的对象，但不包括不可枚举的属性和代理。
+- **%c**：**CSS**。此说明符被忽略，将跳过任何传入的CSS.
+- **%%**：单个百分号（‘%’）。这不消费参数。
