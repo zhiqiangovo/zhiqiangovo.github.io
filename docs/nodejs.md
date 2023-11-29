@@ -761,15 +761,15 @@ process.kill(process.pid);
 执行命令（异步执行）
 
 ```js
-const { exec} = require('child_process')
+const { exec } = require("child_process");
 // 执行查看版本命令
-exec('node -v',(err,stdout,stderr) => {
-    console.log(stdout.toString())
-})
+exec("node -v", (err, stdout, stderr) => {
+  console.log(stdout.toString());
+});
 // v18.18.2
 ```
 
-支持的options选项
+支持的 options 选项
 
 ```txt
 cwd <string> 子进程的当前工作目录。
@@ -788,16 +788,16 @@ gid <number> 设置该进程的组标识。（详见 setgid(2)）
 执行命令（同步执行）
 
 ```js
-const { exec, execSync} = require('child_process')
-const res = execSync('node -v')
-console.log(res.toString())  // // v18.18.2
+const { exec, execSync } = require("child_process");
+const res = execSync("node -v");
+console.log(res.toString()); // // v18.18.2
 // 打开百度并进入无痕模式
-execSync("start chrome http://www.baidu.com --incognito") 
+execSync("start chrome http://www.baidu.com --incognito");
 ```
 
 ### 3：execFile
 
-execFile适合执行可执行文件。例如执行一个node脚本，或者shell文件，windows可以编写cmd脚本，posix可以编写脚本
+execFile 适合执行可执行文件。例如执行一个 node 脚本，或者 shell 文件，windows 可以编写 cmd 脚本，posix 可以编写脚本
 
 **bat.cmd**
 
@@ -813,54 +813,54 @@ node test.js
 **index.js**
 
 ```js
-const {execFile} = require('child_process')
-const path = require('path')
-execFile(path.resolve(process.cwd(),'./bat.cmd'),null,(err,stdout) => {
-    console.log(stdout.toString())
-})
+const { execFile } = require("child_process");
+const path = require("path");
+execFile(path.resolve(process.cwd(), "./bat.cmd"), null, (err, stdout) => {
+  console.log(stdout.toString());
+});
 ```
 
 ### 4：spawn
 
-**spawn**用于执行一些实时获取的信息，因为spawn返回的是流，边执行边返回。**exec**是返回一个完整的buffer，buffer的大小是200k，如果超出会报错，而**spawn**是无上限的。
+**spawn**用于执行一些实时获取的信息，因为 spawn 返回的是流，边执行边返回。**exec**是返回一个完整的 buffer，buffer 的大小是 200k，如果超出会报错，而**spawn**是无上限的。
 
-**spawn**在执行完成后会抛出close事件监听，并返回状态码，通过状态码可以知道子进程是否顺利执行。**exec**只能通过返回的buffer去识别完成状态，识别起来比较麻烦。
+**spawn**在执行完成后会抛出 close 事件监听，并返回状态码，通过状态码可以知道子进程是否顺利执行。**exec**只能通过返回的 buffer 去识别完成状态，识别起来比较麻烦。
 
 ```js
-const { exec, execSync, execFile,spawn} = require('child_process')
-const command = spawn('netstat')
-command.stdout.on ("data",(stream) => {
-    console.log(stream.toString())
-})
-command.on("close",()=> {
-    console.log('结束了')
-})
+const { exec, execSync, execFile, spawn } = require("child_process");
+const command = spawn("netstat");
+command.stdout.on("data", (stream) => {
+  console.log(stream.toString());
+});
+command.on("close", () => {
+  console.log("结束了");
+});
 ```
 
-**exec底层是通过execFile实现，execFile底层是通过spawn实现**
+**exec 底层是通过 execFile 实现，execFile 底层是通过 spawn 实现**
 
 ### 5：fork
 
-使用场景为大量计算，或者容易阻塞主线程操作的一些代码，就适合开发fork
+使用场景为大量计算，或者容易阻塞主线程操作的一些代码，就适合开发 fork
 
 index.js
 
 ```js
-const { fork} = require('child_process')
-const testProcess = fork('./test.js')
-testProcess.send('我是主进程')
-testProcess.on('message',(data) => {
-    console.log('我是主进程接受消息111:',data)
-})
+const { fork } = require("child_process");
+const testProcess = fork("./test.js");
+testProcess.send("我是主进程");
+testProcess.on("message", (data) => {
+  console.log("我是主进程接受消息111:", data);
+});
 ```
 
 test.js
 
 ```js
-process.on('message',(data) => {
-    console.log('子进程接受消息',data)
-})
-process.send('我是子进程')
+process.on("message", (data) => {
+  console.log("子进程接受消息", data);
+});
+process.send("我是子进程");
 ```
 
 输出：
@@ -870,9 +870,9 @@ process.send('我是子进程')
 子进程接受消息 我是主进程
 ```
 
-send发送消息，message接受消息，可以相互发送接收
+send 发送消息，message 接受消息，可以相互发送接收
 
-fork底层使用的是IPC通道进行通讯的
+fork 底层使用的是 IPC 通道进行通讯的
 
 ![](./public/node/child_process.png)
 
@@ -880,20 +880,20 @@ fork底层使用的是IPC通道进行通讯的
 
 ### 1：EventEmitter
 
-Node.js核心API都是采用**异步事件驱动架构**，简单来说就是通过有效的方法来监听事件状态的变化，并在变化的时候做出相应的动作。
+Node.js 核心 API 都是采用**异步事件驱动架构**，简单来说就是通过有效的方法来监听事件状态的变化，并在变化的时候做出相应的动作。
 
 ```js
-const EventEmitter = require('events')
-const bus =new EventEmitter();
-bus.on('test',data => {
-    console.log(data)
-})
-bus.emit('test','xxxxxx')
+const EventEmitter = require("events");
+const bus = new EventEmitter();
+bus.on("test", (data) => {
+  console.log(data);
+});
+bus.emit("test", "xxxxxx");
 ```
 
 ### 2：事件模型
 
-Node.js事件模型采用了**发布订阅者设计模式**
+Node.js 事件模型采用了**发布订阅者设计模式**
 
 ![](./public/node/subon.png)
 
@@ -902,41 +902,42 @@ Node.js事件模型采用了**发布订阅者设计模式**
 监听消息数量的默认是**10**个，可以调用**setMaxListeners**传入数量来解除限制
 
 ```js
-event.setMaxListeners(20)
+event.setMaxListeners(20);
 ```
 
-只想监听一次使用**once**，即使emit派发多次也只触发一次
+只想监听一次使用**once**，即使 emit 派发多次也只触发一次
 
 ```js
-const EventEmitter = require('events')
-const bus =new EventEmitter();
-bus.once('test',data => {
-    console.log(data)
-})
-bus.emit('test','xxxxxx')
-bus.emit('test','xxxxxx')
-bus.emit('test','xxxxxx')
+const EventEmitter = require("events");
+const bus = new EventEmitter();
+bus.once("test", (data) => {
+  console.log(data);
+});
+bus.emit("test", "xxxxxx");
+bus.emit("test", "xxxxxx");
+bus.emit("test", "xxxxxx");
 ```
 
 取消侦听使用**off**
 
 ```js
-const EventEmitter = require('events')
-const bus =new EventEmitter();
-const fn = data => {
-    console.log(data)
-}
-bus.on('test',fn)
-bus.off('test',fn)
-bus.emit('test','xxxxxx')
+const EventEmitter = require("events");
+const bus = new EventEmitter();
+const fn = (data) => {
+  console.log(data);
+};
+bus.on("test", fn);
+bus.off("test", fn);
+bus.emit("test", "xxxxxx");
 ```
+
 ## 十五：util
 
-util是node.js内部提供的很多实用或者工具类型的API，方便我们快速开发。
+util 是 node.js 内部提供的很多实用或者工具类型的 API，方便我们快速开发。
 
 ### 1：util.promisify
 
-将回调函数类型变成promise风格
+将回调函数类型变成 promise 风格
 
 ```js
 import { exec } from "node:child_process";
@@ -980,12 +981,173 @@ console.log(util.format("%s---%s", "foo", "bar"));
 // foo---bar
 ```
 
-- **%s**：**string** 将用于转换除**BigInt**，**Object**和**-0**之外的所有值。**BigInt**值将用n表示，没有用户定义的toString函数的对象使用具有选项**{depth：0，colors：false，compact：3}**的**util.inspect()**进行检查。
+- **%s**：**string** 将用于转换除**BigInt**，**Object**和**-0**之外的所有值。**BigInt**值将用 n 表示，没有用户定义的 toString 函数的对象使用具有选项**{depth：0，colors：false，compact：3}**的**util.inspect()**进行检查。
 - **%d**：**Number** 将用于转换除**BigInt**和**Symbol**之外的所有值。
-- **%i**：**parseInt(value,10)**  用于除**BigInt**和**Symbol**之外的所有值。
-- **%f**：**parseFloat(value)**  用于除**Symbol**之外的所有值。
+- **%i**：**parseInt(value,10)** 用于除**BigInt**和**Symbol**之外的所有值。
+- **%f**：**parseFloat(value)** 用于除**Symbol**之外的所有值。
 - **%j**：**JSON**。如果参数包含循环引用，则替换为字符串 **'[Circular]'**。
 - **%o**：**Object**。具有通用 JavaScript 对象格式的对象的字符串表示形式。 类似于具有选项 **{ showHidden: true, showProxy: true }**的 **util.inspect()**。 这将显示完整的对象，包括不可枚举的属性和代理。
 - **%O**：**Object**. 具有通用 JavaScript 对象格式的对象的字符串表示形式。 类似于没有选项的 **util.inspect()**。 这将显示完整的对象，但不包括不可枚举的属性和代理。
-- **%c**：**CSS**。此说明符被忽略，将跳过任何传入的CSS.
+- **%c**：**CSS**。此说明符被忽略，将跳过任何传入的 CSS.
 - **%%**：单个百分号（‘%’）。这不消费参数。
+
+## 十六：fs
+
+### 1：概述
+
+在 node.js 中，**fs**模块是文件系统模块（File System module）的缩写，它提供了与文件系统进行交互的各种功能。通过 fs 模块，可以执行读取文件，写入文件，更改文件权限，创建目录等操作。
+
+### 2：读取文件
+
+**readFile（异步）**，**readFileSync（同步）**
+
+```js
+import fs from "node:fs";
+
+fs.readFile("./index.txt", (err, data) => {
+  if (err) return;
+  console.log(data.toString());
+});
+
+const data = fs.readFileSync("./index.txt");
+console.log(data.toString());
+```
+
+```js
+import fs from "node:fs/promises";
+fs.readFile("./index.txt")
+  .then((res) => {
+    console.log(res.toString());
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+```
+
+fs 支持同步和异步两种模式，同步方式运行代码，会阻塞下面代码运行。
+
+fs 新增了 promise 版本，只需要在引入包后增加**/promise**即可，fs 便可支持 promise 回调。
+
+fs 返回的是一个 buffer 二级制数据，每两个十六进制数字表示一个字节。
+
+**配置选项**
+
+```js
+import fs from "node:fs/promises";
+fs.readFile("./index.txt", {
+  encoding: "utf-8",
+  flag: "",
+})
+  .then((res) => {
+    console.log(res.toString());
+  })
+  .catch((err) => {
+    console.log(err);
+  });
+```
+
+readFile：第一个参数是**读取的路径**，第二个参数是**配置项**。
+
+**encoding**支持各种编码 utf-8 之类的，
+
+**flag**参数
+
+- **'a'**：打开文件进行追加。如果文件不存在，则创建文件。
+
+- '**ax'**：类似于'a'，但如果路径存在则失败。
+
+- **'a+'**：打开文件进行读取和追加。如果文件不存在，则创建文件。
+
+- **'ax+'**：类似于'a+'，但如果路径存在则失败。
+
+- **'as'**：以同步模式打开文件进行读取和追加。如果文件不存在，则创建该文件。
+
+- **'r'**：打开文件进行读取。如果文件不存在，则会发生异常。
+
+- **'r+'**：打开文件进行读写。如果文件不存在，则会发生异常。
+
+- **'rs+'**：以同步模式打开文件进行读写。指示操作系统绕过本地文件系统缓存。
+
+  这主要用于 NFS 挂载上打开文件，因为它允许跳过可能过时的本地缓存。它对 I/O 性能有非常实际的影响，因此除非需要。否则不建议使用此标志。
+
+  这不会将 fs.open()或 fsPromise.open()变成同步阻塞调用。如果需要同步操作，应该使用类似 fs.openSync()的东西。
+
+- **'w'**：打开文件进行写入。创建（如果它不存在）或截断（如果它存在）该文件。
+
+- **'wx‘**：类似于'w'但如果路径存在则失败。
+
+- **'w+'**：打开文件进行读写。创建（如果它不存在）或截断（如果它存在）该文件。
+
+- **'wx+'**：类似于'w+'，但如果路径存在则失败。
+
+**可读流读取（大文件）**
+
+```js
+import fs from "node:fs";
+const readStream = fs.createReadStream("./index.txt", {
+  encoding: "utf-8",
+});
+readStream.on("data", (chunk) => {
+  console.log(chunk);
+});
+readStream.on("end", () => {
+  console.log("读取完成");
+});
+```
+
+### 3：创建文件夹
+
+```js
+import fs from "node:fs";
+// 开启递归创建多个文件夹
+fs.mkdir("test/a/b/c", { recursive: true }, () => {});
+```
+
+### 4：删除文件夹
+
+```js
+import fs from "node:fs";
+// 递归删除多个文件夹
+fs.rm("test", { recursive: true }, () => {});
+```
+
+### 5：重命名文件
+
+```js
+import fs from "node:fs";
+fs.renameSync("index.txt", "index1.txt");
+```
+
+### 6：监听文件的变化
+
+```js
+import fs from "node:fs";
+fs.watch("index1.txt", (event, filename) => {
+  console.log(event, filename);
+});
+```
+
+### 7：执行顺序与 V8
+
+```js
+const fs = require("node:fs");
+
+fs.readFile(
+  "./index.txt",
+  {
+    encoding: "utf-8",
+    flag: "r",
+  },
+  (err, dataStr) => {
+    if (err) throw err;
+    console.log("fs");
+  }
+);
+
+setImmediate(() => {
+  console.log("setImmediate");
+});
+// setImmediate fs
+```
+
+Node.js 读取文件的时候使用的是**libuv**进行调度的，而**setImmediate**是由**V8**进行调度的，文件读取完成后**libuv**才会将**fs**的结果推入**V8**的队列
