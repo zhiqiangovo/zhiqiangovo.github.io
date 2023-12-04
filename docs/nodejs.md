@@ -1151,3 +1151,64 @@ setImmediate(() => {
 ```
 
 Node.js 读取文件的时候使用的是**libuv**进行调度的，而**setImmediate**是由**V8**进行调度的，文件读取完成后**libuv**才会将**fs**的结果推入**V8**的队列
+
+### 8：写入文件
+
+**writeFileSync**
+
+```js
+import fs from "node:fs";
+fs.writeFileSync("index.txt", "hhh");
+```
+
+第一个参数：写入的文件；
+
+第二个参数：写入的内容；
+
+第三个是 options 可选项 encoding 编码 mode 权限 flag
+
+**追加写入**
+
+```js
+import fs from "node:fs";
+fs.writeFileSync("index.txt", "xxx", { flag: "a" });
+```
+
+```js
+fs.appendFileSync("index.txt", "sss");
+```
+
+**可写流**
+
+```js
+import fs from "node:fs";
+const data = ["1", "2", "3", "4"];
+let writeStream = fs.createWriteStream("index.txt");
+data.forEach((item) => {
+  writeStream.write(item + "\n");
+});
+writeStream.end();
+writeStream.on("finish", () => {
+  console.log("写入完成");
+});
+```
+
+### 9：硬链接和软链接
+
+```js
+import fs from "node:fs";
+fs.linkSync("index.txt", "index1.txt"); // 硬链接
+fs.symlinkSync("index.txt", "index2.txt"); // 软链接
+```
+
+**硬链接**：
+
+1. **文件共享**：硬链接允许多个文件名指向同一个文件，这样在不同位置使用不同的文件名引用相同内容。这样的共享文件可以节省存储空间，并且在多个位置对文件的修改会反映在所有引用文件上。
+2. **文件备份**：通过创建硬来链接，可以在不复制文件的情况下创建文件的备份。如果原始文件发生更改，备份文件也会自动更新。这样可以节省磁盘空间，并确保备份文件与原始文件保持同步。
+3. **文件重命名**：通过创建硬链接，可以为文件创建一个新的文件名，而无需复制或移动文件。这对于需要更改文件名但保持相同内容和属性的场景非常有用。
+
+**软链接**：
+
+1. **软链接可以创建指向文件或目录的引用**。这使得你可以在不复制或移动文件的情况下引用它们，并在不同位置使用不同文件名访问相同的内容。
+2. **软链接可以用于创建快捷方式或别名**，使得你可以通过一个简短或易记的路径来访问复杂或深层次的目录结构。
+3. **软链接可以用于解决文件或目录的位置变化问题**。如果目标文件或目录被移动或重命名，只需更新软链接的目标路径即可，而不需要修改引用该文件或目录的其他代码。
