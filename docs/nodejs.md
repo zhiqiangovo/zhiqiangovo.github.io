@@ -1418,3 +1418,84 @@ package.json
 ```shell
 npm link
 ```
+
+## 十九：markdown 转 html
+
+markdown 是一种轻量级标记语言，它允许人们使用易读易写的纯文本格式编写文档。
+
+### 1：前置
+
+- **EJS**：一款强大的 JavaScript 模板引擎，可以帮助我们在 HTML 中嵌入动态内容。使用 EJS，可以将 markdown 转换为 HTML 页面。
+- **Marked**：一个流行的 Markdown 解析器和编译器，可以将 markdown 语法转换为 HTML 标记。
+- **BrowserSync**：一个强大的开发工具，它可以帮助实时预览和同步网页更改。
+
+### 2：实战
+
+template.ejs
+
+```ejs
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%=title %></title>
+  </head>
+  <body>
+    <%- content %>
+  </body>
+</html>
+```
+
+test.md
+
+```markdown
+## hhahah
+
+- sdad1
+  dsad1
+```
+
+index.js
+
+```js
+// 导入ejs库，用于渲染模板
+const ejs = require("ejs");
+// 导入fs模块，用于文件系统操作
+const fs = require("node:fs");
+// 导入marked库，用于将markdown转换为HTML
+const marked = require("marked");
+// 读取test.md文件的内容
+const readme = fs.readFileSync("test.md");
+// 导入browser-sync库，用于实时预览和同步更改
+const browserSync = require("browser-sync");
+const openBrowser = () => {
+  const browser = browserSync.create();
+  browser.init({
+    server: {
+      baseDir: "./",
+      index: "index.html",
+    },
+  });
+  return browser;
+};
+
+ejs.renderFile(
+  "template.ejs",
+  {
+    content: marked.parse(readme.toString()),
+    title: "mark",
+  },
+  (err, data) => {
+    if (err) {
+      console.log(err);
+    }
+    let createStream = fs.createWriteStream("index.html");
+    createStream.write(data);
+    createStream.close();
+    createStream.on("finish", () => {
+      openBrowser();
+    });
+  }
+);
+```
