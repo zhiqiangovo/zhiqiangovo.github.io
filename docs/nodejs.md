@@ -1283,3 +1283,138 @@ console.log(hashValue);
 
 1. 我们可以避免密码明文传输，使用 MD5 加密或者 sha256
 2. 验证文件的完整性，读取文件内容生成 md5，如果前端上传的 md5 和后端的读取文件内部的 md5 匹配说明文件是完整的
+
+## 十八：搭建脚手架
+
+脚手架是指创建一个定制化的工具，用于快速生成项目的基础结构和代码文件，以及提供一些常用的命令和功能。通过编写自己的脚手架，可以定义项目的目录结构，文件模板，管理项目的依赖项，生成代码片段，以及提供命令行接口等功能
+
+1. **项目结构**：脚手架定义了项目的目录结构，包括源代码，配置文件，静态资源等。
+2. **文件模板**：脚手架提供了一些预定义的文件模板，如 HTML 模板，样式表，配置文件等，以加快开发者创建新文件的速度。
+3. **命令行接口**：脚手架通常提供一个命令行接口，通过输入命令和参数，开发者可以执行各种任务，如创建新项目，生成代码文件，运行测试等。
+4. **依赖管理**：脚手架可以帮助开发者管理项目的依赖项，自动安装和配置所需的库和工具。
+5. **代码生成**：脚手架可以生成常见的代码结构，如组件，模块，路由等，以提高开发效率。
+6. **配置管理**：脚手架可以提供一些默认的配置选项，并允许开发者根据需要进行自定义配置。
+
+常见脚手架：**vue-cli** **Angular CLI** **Create React App**
+
+### 1：前置工作
+
+- **commander**：用于构建命令行工具的 npm 库。它提供了一种简单而直接的方式来创建命令行接口，并处理命令行参数和选项，主要是定义命令，子命令，选项和帮助信息，还可以处理命令行的交互，使用户能够与你的命令行工具进行交互。
+- **inquirer**：用于与用户进行交互和收集信息。它提供了各种丰富的交互式提示（如输入框，选择列表，确认框），可以帮助你构建灵活的命令行界面。通过 inquirer，你可以向用户提出问题，获取用户的输入，并根据用户的回答采取相应的操作。
+- **ora**：用于在命令行界面显示加载动画的 npm 库，它可以帮助你在执行耗时的任务时提供一个友好的加载状态提示。Ora 提供了一系列自定义的加载动画，如旋转器，进度条。
+- **download-git-repo**：用于下载 git 仓库的 npm 库。它提供了一个简单的接口，可以方便地从远程 git 仓库中下载项目代码。可以指定下载的仓库和目标目录，并可选择指定分支或标签。
+
+### 2：搭建
+
+index.js
+
+```js
+#!/usr/bin/env node
+import { program } from "commander";
+import inquirer from "inquirer";
+import fs from "node:fs";
+import { checkPath, downloadTemp } from "./utils.js";
+let json = fs.readFileSync("./package.json", "utf-8");
+json = JSON.parse(json);
+program.version(json.version);
+
+program
+  .command("create <project>")
+  .alias("ctr")
+  .description("create a new project")
+  .action((project) => {
+    inquirer
+      .prompt([
+        {
+          type: "input",
+          name: "projectName",
+          message: "project name",
+          default: project,
+        },
+        {
+          type: "confirm",
+          name: "isTs",
+          message: "是否支持typeScript",
+        },
+      ])
+      .then((answer) => {
+        if (checkPath(answer.projectName)) {
+          console.log("文件已存在");
+          return;
+        }
+
+        if (answer.isTs) {
+          downloadTemp("ts", answer.projectName);
+        } else {
+          downloadTemp("js", answer.projectName);
+        }
+      });
+  });
+
+program.parse(process.argv);
+```
+
+utils.js
+
+```js
+import fs from "node:fs";
+import download from "download-git-repo";
+import ora from "ora";
+const spinner = ora("下载中...");
+
+export const checkPath = (path) => {
+  return fs.existsSync(path);
+};
+
+export const downloadTemp = (branch, project) => {
+  spinner.start();
+  return new Promise((resolve, reject) => {
+    download(
+      `direct:https://gitee.com/chinafaker/vue-template.git#${branch}`,
+      project,
+      { clone: true },
+      function (err) {
+        if (err) {
+          reject(err);
+          console.log(err);
+        }
+        resolve();
+        spinner.succeed("下载完成");
+      }
+    );
+  });
+};
+```
+
+package.json
+
+```json
+{
+  "name": "test",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "commander": "^11.1.0",
+    "download-git-repo": "^3.0.2",
+    "inquirer": "^9.2.12",
+    "ora": "^8.0.1"
+  },
+  "type": "module",
+  "bin": {
+    "test-cli": "./index.js"
+  }
+}
+```
+
+用于生成软链接挂载到全局，便可以全局执行 test-cli 命令，配置完成之后，需要执行
+
+```shell
+npm link
+```
