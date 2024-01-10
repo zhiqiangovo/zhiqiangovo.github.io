@@ -1555,3 +1555,180 @@ readStream.pipe(zlib.createInflate()).pipe(writeStream);
 2. **压缩效率**：gzip 压缩通常具有更高的压缩率，因为它使用了哈夫曼编码来进一步压缩数据。哈夫曼编码根据字符的出现频率，将较常见的字符用较短的编码表示，从而减少数据的大小。
 3. **压缩速度**：相比于仅使用 Deflate 的方式，gzip 压缩需要更多的计算和处理时间，因为它还要进行哈夫曼编码的步骤。因此，在压缩速度方面，Deflate 可能比 gzip 更快。
 4. **应用场景**：gzip 压缩常用于文件压缩，网络传输和 HTTP 响应的内容编码。它广泛应用于 web 服务器和浏览器之间的数据传输，以减小文件大小和提高网络传输效率。
+
+## 二十：http
+
+### 1：模块介绍
+
+’http‘模块是 node.js 中用于创建和处理 HTTP 服务器和客户端的核心模块。
+
+1. **创建 web 服务器**：可以使用’http‘模块创建一个 HTTP 服务器，用于提供 web 应用程序或网站。通过监听特定的端口，服务器可以接收客户端的请求，并生成响应。可以处理不同的路由，请求方法和参数，实现自定义的业务逻辑。
+2. **构建 RESTful API**：可以使用 HTTP 请求方法（如 GET、POST、PUT、DELETE 等）和路径来定义 API 的不同端点。通过解析请求参数，验证身份和权限，以及生成相应的 JSON 或其他数据格式，可以构建强大的 API 服务。
+3. **代理服务器**：可以创建代理服务器，用于转发客户端的请求到其他服务器。代理服务器可以用于负载均衡、缓存、安全过滤或跨越请求等场景。通过在代理服务器上添加逻辑，可以对请求和响应进行修改、记录或过滤。
+4. **文件服务器**：可以用于创建一个简单的文件服务器，用于提供静态文件（如 HTML、CSS、JavaScript、图像等）。通过读取文件并将其作为响应发送给客户端，可以构建一个基本的文件服务器。
+
+### 2：创建 http 服务器
+
+```js
+const http = require("node:http");
+
+http
+  .createServer((req, res) => {
+    if (req.method === "POST") {
+    }
+  })
+  .listen(80, () => {
+    console.log("80端口监听中...");
+  });
+```
+
+### 3：反向代理
+
+**反向代理**（Reverse Proxy）是一种**网络通信模式**，它充当服务器和客户端之间的中介，将客户端的请求转发到一个或多个后端服务器，并将后端服务器的响应返回给客户端。
+
+1. **负载均衡**：反向代理可以根据预先定义的算法将请求分发到多个后端服务器，以实现负载均衡。这样可以避免某个后端服务器过载，提高整体性能和可用性。
+2. **高可用性**：通过反向代理，可以将请求转发多个后端服务器，以提供冗余和故障转移。如果一个后端服务器出现故障，代理服务器可以将请求转发到其他可用的服务器，从而实现高可用性。
+3. **缓存和性能优化**：反向代理可以缓存静态资源或经常访问的动态内容，以减轻后端服务器的负载并提高响应速度。它还可以通过压缩，合并和优化资源等技术来优化网络性能。
+4. **安全性**：反向代理可以作为防火墙，保护后端服务器免受恶意请求和攻击。它可以过滤恶意请求，检测和阻止攻击，并提供安全认证和访问控制。
+5. **域名和路径重写**：反向代理可以根据特定的规则重写请求的域名和路径，以实现 URL 路由和重定向。这对于系统架构的灵活性和可维护非常有用。
+
+**xm.config.js**
+
+```js
+module.exports = {
+  server: {
+    proxy: {
+      // 代理路径
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+      },
+    },
+  },
+};
+```
+
+**index.html**
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <script>
+      fetch("/api")
+        .then((res) => res.text())
+        .then((res) => {
+          console.log(res);
+        });
+    </script>
+  </body>
+</html>
+```
+
+**index.js**
+
+```js
+const http = require("node:http");
+const fs = require("node:fs");
+const url = require("node:url");
+const { createProxyMiddleware } = require("http-proxy-middleware");
+// 读取到html
+const html = fs.readFileSync("./index.html");
+// 读取代理配置
+const config = require("./xm.config");
+
+const server = http.createServer((req, res) => {
+  const { pathname } = url.parse(req.url);
+  // 获取代理的路径
+  const proxyList = Object.keys(config.server.proxy);
+  if (proxyList.includes(pathname)) {
+    // 如果请求的路径在里面匹配到就进行代理
+    const proxy = createProxyMiddleware(config.server.proxy[pathname]);
+    proxy(req, res);
+    return;
+  }
+
+  res.writeHead(200, {
+    "Content-Type": "text/html",
+  });
+  // 返回html
+  res.end(html);
+});
+server.listen(80, () => {
+  console.log("80端口监听中...");
+});
+```
+
+需要给 html 起个服务
+
+**test.js**
+
+```js
+const http = require("node:http");
+const url = require("node:url");
+http
+  .createServer((req, res) => {
+    const { pathname } = url.parse(req.url);
+    if (pathname === "/api") {
+      res.end("proxy success");
+    }
+  })
+  .listen(3000, () => {
+    console.log("3000端口监听中...");
+  });
+```
+
+从 80 端口转发到 3000 端口，并且无跨域
+
+### 4：动静分离
+
+**动静分离**是一种在 web 服务器架构中常用的优化技术，旨在提高网站的性能和可伸缩性。它基于一个简单的原则：将动态生成的内容（如动态网页、api 请求）与静态资源（如 HTML、CSS、JavaScript、图像文件）分开处理和分发。
+
+1. **性能优化**：将静态资源与动态内容分离可以提高网站的加载速度。由于静态资源往往是不变的，可以使用缓存机制将其存储在 CDN（内容分发网络）或浏览器缓存中，从而减少网络请求和数据传输的开销。
+2. **负载均衡**：通过将动态请求分发到不同的服务器或服务上，可以平衡服务器的负载，提高整个系统的可伸缩性和容错性。
+3. **安全性**：将动态请求和静态资源分开处理可以提高系统的安全性。静态资源通常是公开访问的，而动态请求可能涉及敏感数据或需要特定的身份验证和授权。通过将静态资源与动态内容分离，可以更好地管理访问控制和安全策略。
+
+**实现动静分离的方法**
+
+- **使用反向代理服务器**（如 Nginx，Apache）将静态请求和动态请求转发到不同的后端服务器或服务。
+- **将静态资源部署到 CDN 上**，通过 CDN 分发静态资源，减轻源服务器的负载。
+- **使用专门的静态文件服务器**（如 Amazon S3、Google Cloud Storage）存储和提供静态资源，而将动态请求交给应用服务器处理。
+
+```js
+import http from "node:http";
+import fs from "node:fs";
+import path from "node:path";
+import mime from "mime";
+const server = http.createServer((req, res) => {
+  const { method, url } = req;
+  // 处理静态资源
+  if (method === "GET" && url.startsWith("/static")) {
+    // 获取文件路径
+    const filePath = path.join(process.cwd(), url);
+    // 获取文件的mine类型
+    const mimeType = mime.getType(filePath);
+    fs.readFile(filePath, (err, data) => {
+      if (err) {
+        res.writeHead(404, {
+          "Content-Type": "text/plain",
+        });
+        res.end("not found");
+      } else {
+        res.writeHead(200, {
+          "Content-Type": mimeType,
+          "Cache-Control": "public, max-age=3600",
+        });
+        res.end(data);
+      }
+    });
+  }
+});
+server.listen(80, () => {
+  console.log("80端口监听中...");
+});
+```
